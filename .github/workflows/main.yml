@@ -31,11 +31,11 @@ jobs:
           npm install -g newman
           npm install -g newman-reporter-htmlextra
       
-      - name: Run script replace
-        run: |
-          chmod +x ./collections/script.sh
-          ./collections/script.sh
-          cat ./collections/main/Faction_Portal_API_Tests.postman_collection.json | grep src
+#       - name: Run script replace
+#         run: |
+#           chmod +x ./collections/script.sh
+#           ./collections/script.sh
+#           cat ./collections/main/Faction_Portal_API_Tests.postman_collection.json | grep src
 
       - name: Run API Tests
         id: run-newman
