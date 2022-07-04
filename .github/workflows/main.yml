@@ -1,7 +1,7 @@
 name: Daily Newman API tests on Develop
 on:
   push:
-    branches: [ TestAPICollections ]
+    branches: [ main ]
   schedule:
     - cron: '*/5 * * * *'
 
@@ -23,7 +23,7 @@ jobs:
       - name: Checkout collections
         uses: actions/checkout@v3
         with:
-          ref: TestAPICollections
+          ref: main
           path: collections
 
       - name: Install newman
