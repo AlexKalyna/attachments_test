@@ -1,0 +1,60 @@
+name: Daily Newman API tests on Develop
+on:
+  push:
+    branches: [ TestAPICollections ]
+  schedule:
+    - cron: '*/5 * * * *'
+
+concurrency: 
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 14.x ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Checkout collections
+        uses: actions/checkout@v3
+        with:
+          ref: TestAPICollections
+          path: collections
+
+      - name: Install newman
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+      
+      - name: Run script replace
+        run: |
+          chmod +x ./collections/script.sh
+          ./collections/script.sh
+          cat ./collections/main/Faction_Portal_API_Tests.postman_collection.json | grep src
+
+      - name: Run API Tests
+        id: run-newman
+        run: |
+          newman run ./collections/main/Faction_Portal_API_Tests.postman_collection.json \
+          --environment ./collections/main/Faction_Portal_DEV.postman_environment.json \
+          --ignore-redirects \
+          -r cli,htmlextra \
+          --reporter-htmlextra-showOnlyFails \
+          --reporter-htmlextra-title FactionDevelopFailedTests \
+          --reporter-htmlextra-export ./report.html
+          
+      - name: Output summary to console
+        if: always()
+        run: echo ${{ steps.run-newman.outputs.summary }}
+
+      - name: Share report files as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: report-files
+          path: report.html
